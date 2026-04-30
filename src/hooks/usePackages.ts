@@ -1,0 +1,88 @@
+import { useEffect, useState, useCallback } from 'react';
+import { supabase } from '@/lib/supabase';
+import type { Package, Category, SortOption } from '@/types';
+
+interface UsePackagesOptions {
+  category?: string;
+  search?: string;
+  sort?: SortOption;
+  tag?: string;
+}
+
+const SORT_MAP: Record<SortOption, { column: string; ascending: boolean }> = {
+  downloads: { column: 'weekly_downloads', ascending: false },
+  stars: { column: 'github_stars', ascending: false },
+  recent: { column: 'last_published_at', ascending: false },
+  name: { column: 'name', ascending: true },
+};
+
+export function usePackages({ category, search, sort = 'downloads', tag }: UsePackagesOptions = {}) {
+  const [packages, setPackages] = useState<Package[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchPackages = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+
+    let query = supabase
+      .from('packages')
+      .select('*, category:categories(*), author:authors(*)')
+      .order(SORT_MAP[sort].column, { ascending: SORT_MAP[sort].ascending });
+
+    if (category) {
+      query = query.eq('category.slug', category);
+    }
+    if (search) {
+      query = query.or(`name.ilike.%${search}%,description.ilike.%${search}%`);
+    }
+    if (tag) {
+      query = query.contains('tags', [tag]);
+    }
+
+    const { data, error: err } = await query;
+    if (err) {
+      setError(err.message);
+    } else {
+      setPackages((data as Package[]) ?? []);
+    }
+    setLoading(false);
+  }, [category, search, sort, tag]);
+
+  useEffect(() => { fetchPackages(); }, [fetchPackages]);
+
+  return { packages, loading, error, refetch: fetchPackages };
+}
+
+export function usePackageDetail(name: string) {
+  const [pkg, setPkg] = useState<Package | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    supabase
+      .from('packages')
+      .select('*, category:categories(*), author:authors(*)')
+      .eq('name', name)
+      .single()
+      .then(({ data }) => {
+        setPkg(data as Package | null);
+        setLoading(false);
+      });
+  }, [name]);
+
+  return { pkg, loading };
+}
+
+export function useCategories() {
+  const [categories, setCategories] = useState<Category[]>([]);
+
+  useEffect(() => {
+    supabase
+      .from('categories')
+      .select('*')
+      .order('name')
+      .then(({ data }) => setCategories((data as Category[]) ?? []));
+  }, []);
+
+  return categories;
+}

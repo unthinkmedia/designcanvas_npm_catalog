@@ -18,11 +18,13 @@ export function MetricsBadges({ pkg, compact }: MetricsBadgesProps) {
   return (
     <div style={{
       display: 'flex',
-      flexWrap: 'wrap',
+      flexWrap: 'nowrap',
       alignItems: 'center',
       gap: compact ? tokens.spacingHorizontalXS : tokens.spacingHorizontalS,
       fontSize: tokens.fontSizeBase200,
       color: tokens.colorNeutralForeground3,
+      whiteSpace: 'nowrap',
+      overflow: 'hidden',
     }}>
       <Tooltip content="Weekly downloads" relationship="label">
         <span style={{ display: 'inline-flex', alignItems: 'center', gap: 2 }}>

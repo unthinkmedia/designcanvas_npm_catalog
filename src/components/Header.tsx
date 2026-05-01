@@ -1,7 +1,5 @@
 import {
-  Toolbar,
-  ToolbarButton,
-  Input,
+  Button,
   Avatar,
   Menu,
   MenuTrigger,
@@ -12,21 +10,16 @@ import {
   tokens,
 } from '@fluentui/react-components';
 import {
-  Search24Regular,
   PersonCircle24Regular,
   SignOut24Regular,
   Heart24Regular,
   Settings24Regular,
+  Box24Regular,
 } from '@fluentui/react-icons';
 import { useAuth } from '@/hooks/useAuth';
 import { Link, useNavigate } from 'react-router-dom';
 
-interface HeaderProps {
-  search: string;
-  onSearchChange: (value: string) => void;
-}
-
-export function Header({ search, onSearchChange }: HeaderProps) {
+export function Header() {
   const { user, signIn, signOut } = useAuth();
   const navigate = useNavigate();
 
@@ -35,31 +28,30 @@ export function Header({ search, onSearchChange }: HeaderProps) {
       display: 'flex',
       alignItems: 'center',
       gap: tokens.spacingHorizontalM,
-      padding: `${tokens.spacingVerticalS} ${tokens.spacingHorizontalL}`,
-      borderBottom: `1px solid ${tokens.colorNeutralStroke1}`,
+      padding: `${tokens.spacingVerticalS} ${tokens.spacingHorizontalXL}`,
+      borderBottom: `1px solid ${tokens.colorNeutralStroke2}`,
       background: tokens.colorNeutralBackground1,
+      height: 48,
+      flexShrink: 0,
     }}>
-      <Link to="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: tokens.spacingHorizontalS }}>
-        <Text weight="bold" size={500} style={{ color: tokens.colorBrandForeground1 }}>
-          NPM Catalog
+      <Link to="/" style={{
+        textDecoration: 'none',
+        display: 'flex',
+        alignItems: 'center',
+        gap: tokens.spacingHorizontalS,
+      }}>
+        <Box24Regular style={{ color: tokens.colorBrandForeground1, fontSize: 24 }} />
+        <Text weight="bold" size={400} style={{ color: tokens.colorNeutralForeground1 }}>
+          Design Canvas Plugins
         </Text>
       </Link>
-
-      <div style={{ flex: 1, maxWidth: 480 }}>
-        <Input
-          contentBefore={<Search24Regular />}
-          placeholder="Search packages..."
-          value={search}
-          onChange={(_e, data) => onSearchChange(data.value)}
-          style={{ width: '100%' }}
-        />
-      </div>
 
       <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: tokens.spacingHorizontalS }}>
         {user ? (
           <Menu>
             <MenuTrigger disableButtonEnhancement>
-              <ToolbarButton
+              <Button
+                appearance="subtle"
                 icon={
                   <Avatar
                     name={user.user_metadata?.['user_name'] as string ?? 'User'}
@@ -84,11 +76,13 @@ export function Header({ search, onSearchChange }: HeaderProps) {
             </MenuPopover>
           </Menu>
         ) : (
-          <Toolbar>
-            <ToolbarButton icon={<PersonCircle24Regular />} onClick={signIn}>
-              Sign in with GitHub
-            </ToolbarButton>
-          </Toolbar>
+          <Button
+            appearance="subtle"
+            icon={<PersonCircle24Regular />}
+            onClick={signIn}
+          >
+            Sign in with GitHub
+          </Button>
         )}
       </div>
     </header>

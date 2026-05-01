@@ -35,12 +35,10 @@ export function PackageDetail() {
   const { user } = useAuth();
   const { isFavorite, toggle } = useFavorites();
   const [tab, setTab] = useState<DetailTab>('readme');
-  const [search, setSearch] = useState('');
-
   if (loading) {
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
-        <Header search={search} onSearchChange={setSearch} />
+      <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', background: tokens.colorNeutralBackground2 }}>
+        <Header />
         <div style={{ display: 'flex', justifyContent: 'center', padding: tokens.spacingVerticalXXL }}>
           <Spinner label="Loading package..." />
         </div>
@@ -50,8 +48,8 @@ export function PackageDetail() {
 
   if (!pkg) {
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
-        <Header search={search} onSearchChange={setSearch} />
+      <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', background: tokens.colorNeutralBackground2 }}>
+        <Header />
         <div style={{ textAlign: 'center', padding: tokens.spacingVerticalXXL }}>
           <Text size={500}>Package not found</Text>
           <br />
@@ -66,10 +64,11 @@ export function PackageDetail() {
   const issuesUrl = buildIssuesUrl(pkg.repo_url, pkg.issues_url, displayName, pkg.latest_version);
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
-      <Header search={search} onSearchChange={setSearch} />
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', background: tokens.colorNeutralBackground2 }}>
+      <Header />
 
-      <main style={{ flex: 1, overflow: 'auto', padding: tokens.spacingVerticalL }}>
+      <main style={{ flex: 1, overflow: 'auto', padding: `${tokens.spacingVerticalL} ${tokens.spacingHorizontalXL}` }}>
+        <div style={{ maxWidth: 960, margin: '0 auto' }}>
         <Button
           appearance="subtle"
           icon={<ArrowLeft24Regular />}
@@ -155,7 +154,7 @@ export function PackageDetail() {
           <MetricsBadges pkg={pkg} />
 
           {pkg.tags.length > 0 && (
-            <div style={{ display: 'flex', gap: tokens.spacingHorizontalXS, flexWrap: 'wrap', marginTop: tokens.spacingVerticalS }}>
+            <div style={{ display: 'flex', gap: tokens.spacingHorizontalXS, flexWrap: 'nowrap', marginTop: tokens.spacingVerticalS, overflow: 'hidden' }}>
               {pkg.tags.map(tag => (
                 <Badge key={tag} appearance="tint" size="small">{tag}</Badge>
               ))}
@@ -190,6 +189,7 @@ export function PackageDetail() {
             </Text>
           )}
         </Card>
+        </div>
       </main>
     </div>
   );

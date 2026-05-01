@@ -6,7 +6,7 @@ import {
   Textarea,
   Dropdown,
   Option,
-  Label,
+  Field,
   Spinner,
   Card,
   Badge,
@@ -18,8 +18,16 @@ import {
   DialogBody,
   DialogActions,
   DialogContent,
+  makeStyles,
 } from '@fluentui/react-components';
-import { Add24Regular, Delete24Regular } from '@fluentui/react-icons';
+import {
+  Add24Regular,
+  Delete24Regular,
+  Dismiss24Regular,
+  Globe24Regular,
+  Tag24Regular,
+  Info16Regular,
+} from '@fluentui/react-icons';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useCategories } from '@/hooks/usePackages';
@@ -27,13 +35,58 @@ import { supabase } from '@/lib/supabase';
 import { Header } from '@/components/Header';
 import type { Package } from '@/types';
 
+const useStyles = makeStyles({
+  formPanel: {
+    marginBottom: tokens.spacingVerticalL,
+    padding: `${tokens.spacingVerticalL} ${tokens.spacingHorizontalXL}`,
+    borderRadius: tokens.borderRadiusXLarge,
+  },
+  formHeader: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: tokens.spacingVerticalL,
+  },
+  formGrid: {
+    display: 'grid',
+    gridTemplateColumns: '1fr 1fr',
+    gap: `${tokens.spacingVerticalM} ${tokens.spacingHorizontalL}`,
+    maxWidth: '640px',
+  },
+  fullSpan: {
+    gridColumn: '1 / -1',
+  },
+  sectionLabel: {
+    gridColumn: '1 / -1',
+    display: 'flex',
+    alignItems: 'center',
+    gap: tokens.spacingHorizontalS,
+    paddingTop: tokens.spacingVerticalS,
+  },
+  formActions: {
+    gridColumn: '1 / -1',
+    display: 'flex',
+    gap: tokens.spacingHorizontalS,
+    paddingTop: tokens.spacingVerticalM,
+    borderTop: `1px solid ${tokens.colorNeutralStroke2}`,
+    marginTop: tokens.spacingVerticalXS,
+  },
+  pkgRow: {
+    display: 'flex',
+    flexDirection: 'row' as const,
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: `${tokens.spacingVerticalS} ${tokens.spacingHorizontalM}`,
+  },
+});
+
 export function Admin() {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const categories = useCategories();
+  const styles = useStyles();
   const [packages, setPackages] = useState<Package[]>([]);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState('');
 
   // Add form state
   const [showAdd, setShowAdd] = useState(false);
@@ -81,8 +134,8 @@ export function Admin() {
 
   if (!user) {
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
-        <Header search={search} onSearchChange={setSearch} />
+      <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', background: tokens.colorNeutralBackground2 }}>
+        <Header />
         <div style={{ textAlign: 'center', padding: tokens.spacingVerticalXXL }}>
           <Text size={500}>Admin access required</Text>
           <br />
@@ -95,10 +148,11 @@ export function Admin() {
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
-      <Header search={search} onSearchChange={setSearch} />
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', background: tokens.colorNeutralBackground2 }}>
+      <Header />
 
-      <main style={{ flex: 1, overflow: 'auto', padding: tokens.spacingVerticalL }}>
+      <main style={{ flex: 1, overflow: 'auto', padding: `${tokens.spacingVerticalL} ${tokens.spacingHorizontalXL}` }}>
+        <div style={{ maxWidth: 1280, margin: '0 auto' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: tokens.spacingVerticalM }}>
           <Text size={600} weight="semibold">Admin — Manage Packages</Text>
           <Button appearance="primary" icon={<Add24Regular />} onClick={() => setShowAdd(!showAdd)}>
@@ -107,27 +161,58 @@ export function Admin() {
         </div>
 
         {showAdd && (
-          <Card style={{ marginBottom: tokens.spacingVerticalL, padding: tokens.spacingVerticalM }}>
-            <Text size={500} weight="semibold" block style={{ marginBottom: tokens.spacingVerticalS }}>
-              Add New Package
-            </Text>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: tokens.spacingVerticalS, maxWidth: 480 }}>
-              <div>
-                <Label required>Package name</Label>
-                <Input value={formName} onChange={(_e, d) => setFormName(d.value)} placeholder="my-package" />
+          <Card className={styles.formPanel}>
+            <div className={styles.formHeader}>
+              <Text size={500} weight="semibold">Add New Package</Text>
+              <Button
+                appearance="subtle"
+                icon={<Dismiss24Regular />}
+                onClick={() => setShowAdd(false)}
+                aria-label="Close form"
+              />
+            </div>
+
+            <div className={styles.formGrid}>
+              {/* ── Package identity ── */}
+              <Field label="Package name" required hint="The npm package name without scope">
+                <Input
+                  value={formName}
+                  onChange={(_e, d) => setFormName(d.value)}
+                  placeholder="e.g. react-query"
+                  autoFocus
+                />
+              </Field>
+
+              <Field label="Scope" hint="Omit the @ prefix">
+                <Input
+                  value={formScope}
+                  onChange={(_e, d) => setFormScope(d.value)}
+                  placeholder="e.g. tanstack"
+                  contentBefore={<Text size={300} style={{ color: tokens.colorNeutralForeground3 }}>@</Text>}
+                />
+              </Field>
+
+              <Field label="Description" className={styles.fullSpan}>
+                <Textarea
+                  value={formDesc}
+                  onChange={(_e, d) => setFormDesc(d.value)}
+                  placeholder="A brief description of what the package does"
+                  rows={3}
+                  resize="vertical"
+                />
+              </Field>
+
+              {/* ── Classification ── */}
+              <div className={styles.sectionLabel}>
+                <Tag24Regular style={{ color: tokens.colorNeutralForeground3 }} />
+                <Text size={300} weight="semibold" style={{ color: tokens.colorNeutralForeground3, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  Classification
+                </Text>
               </div>
-              <div>
-                <Label>Scope (without @)</Label>
-                <Input value={formScope} onChange={(_e, d) => setFormScope(d.value)} placeholder="myorg" />
-              </div>
-              <div>
-                <Label>Description</Label>
-                <Textarea value={formDesc} onChange={(_e, d) => setFormDesc(d.value)} placeholder="What does this package do?" />
-              </div>
-              <div>
-                <Label>Category</Label>
+
+              <Field label="Category">
                 <Dropdown
-                  placeholder="Select category"
+                  placeholder="Select a category"
                   value={categories.find(c => c.id === formCategory)?.name ?? ''}
                   onOptionSelect={(_e, d) => setFormCategory(d.optionValue as string)}
                 >
@@ -135,24 +220,59 @@ export function Admin() {
                     <Option key={c.id} value={c.id}>{c.name}</Option>
                   ))}
                 </Dropdown>
+              </Field>
+
+              <Field label="Tags" hint="Comma-separated keywords for search">
+                <Input
+                  value={formTags}
+                  onChange={(_e, d) => setFormTags(d.value)}
+                  placeholder="e.g. react, hooks, state"
+                />
+              </Field>
+
+              {/* ── Links ── */}
+              <div className={styles.sectionLabel}>
+                <Globe24Regular style={{ color: tokens.colorNeutralForeground3 }} />
+                <Text size={300} weight="semibold" style={{ color: tokens.colorNeutralForeground3, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  Links
+                </Text>
               </div>
-              <div>
-                <Label>Repository URL</Label>
-                <Input value={formRepoUrl} onChange={(_e, d) => setFormRepoUrl(d.value)} placeholder="https://github.com/org/repo" />
-              </div>
-              <div>
-                <Label>npm URL (auto-generated if blank)</Label>
-                <Input value={formNpmUrl} onChange={(_e, d) => setFormNpmUrl(d.value)} placeholder="https://www.npmjs.com/package/..." />
-              </div>
-              <div>
-                <Label>Tags (comma-separated)</Label>
-                <Input value={formTags} onChange={(_e, d) => setFormTags(d.value)} placeholder="react, hooks, state" />
-              </div>
-              <div style={{ display: 'flex', gap: tokens.spacingHorizontalS }}>
-                <Button appearance="primary" onClick={handleAdd} disabled={!formName || saving}>
-                  {saving ? 'Saving...' : 'Save'}
+
+              <Field label="Repository URL" className={styles.fullSpan}>
+                <Input
+                  value={formRepoUrl}
+                  onChange={(_e, d) => setFormRepoUrl(d.value)}
+                  placeholder="https://github.com/org/repo"
+                  type="url"
+                />
+              </Field>
+
+              <Field
+                label="npm URL"
+                className={styles.fullSpan}
+                hint={
+                  <>
+                    <Info16Regular style={{ verticalAlign: 'text-bottom', marginRight: 4 }} />
+                    Auto-generated from name &amp; scope if left blank
+                  </>
+                }
+              >
+                <Input
+                  value={formNpmUrl}
+                  onChange={(_e, d) => setFormNpmUrl(d.value)}
+                  placeholder="https://www.npmjs.com/package/..."
+                  type="url"
+                />
+              </Field>
+
+              {/* ── Actions ── */}
+              <div className={styles.formActions}>
+                <Button appearance="primary" onClick={handleAdd} disabled={!formName.trim() || saving}>
+                  {saving ? <><Spinner size="tiny" /> Saving…</> : 'Add Package'}
                 </Button>
-                <Button appearance="subtle" onClick={() => setShowAdd(false)}>Cancel</Button>
+                <Button appearance="subtle" onClick={() => setShowAdd(false)}>
+                  Cancel
+                </Button>
               </div>
             </div>
           </Card>
@@ -163,7 +283,7 @@ export function Admin() {
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: tokens.spacingVerticalS }}>
             {packages.map(pkg => (
-              <Card key={pkg.id} style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+              <Card key={pkg.id} className={styles.pkgRow}>
                 <div>
                   <Text weight="semibold">
                     {pkg.scope ? `@${pkg.scope}/` : ''}{pkg.name}
@@ -202,6 +322,7 @@ export function Admin() {
             ))}
           </div>
         )}
+        </div>
       </main>
     </div>
   );

@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { Text, Spinner, tokens } from '@fluentui/react-components';
+import { Spinner, tokens } from '@fluentui/react-components';
 import { Header } from '@/components/Header';
+import { HeroBanner } from '@/components/HeroBanner';
 import { PackageCard } from '@/components/PackageCard';
-import { FilterSidebar } from '@/components/FilterSidebar';
+import { FilterBar } from '@/components/FilterSidebar';
 import { usePackages } from '@/hooks/usePackages';
 import { useAuth } from '@/hooks/useAuth';
 import { useFavorites } from '@/hooks/useFavorites';
@@ -10,56 +11,59 @@ import type { SortOption } from '@/types';
 
 export function Home() {
   const [search, setSearch] = useState('');
-  const [category, setCategory] = useState('');
+  const [categories, setCategories] = useState<string[]>([]);
   const [sort, setSort] = useState<SortOption>('downloads');
 
-  const { packages, loading } = usePackages({ search, category: category || undefined, sort });
+  const { packages, loading } = usePackages({ search, categories: categories.length ? categories : undefined, sort });
   const { user } = useAuth();
   const { isFavorite, toggle } = useFavorites();
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
-      <Header search={search} onSearchChange={setSearch} />
+    <div style={{
+      display: 'flex',
+      flexDirection: 'column',
+      height: '100vh',
+      background: tokens.colorNeutralBackground2,
+    }}>
+      <Header />
+      <HeroBanner />
+      <FilterBar
+        search={search}
+        onSearchChange={setSearch}
+        selectedCategories={categories}
+        onCategoriesChange={setCategories}
+        sort={sort}
+        onSortChange={setSort}
+        packageCount={packages.length}
+      />
 
-      <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
-        <FilterSidebar
-          selectedCategory={category}
-          onCategoryChange={setCategory}
-          sort={sort}
-          onSortChange={setSort}
-        />
-
-        <main style={{
-          flex: 1,
-          overflow: 'auto',
-          padding: tokens.spacingVerticalL,
+      <main style={{
+        flex: 1,
+        overflow: 'auto',
+        padding: tokens.spacingVerticalL,
+      }}>
+        <div style={{
+          maxWidth: 1280,
+          margin: '0 auto',
+          padding: `0 ${tokens.spacingHorizontalM}`,
         }}>
-          <div style={{ marginBottom: tokens.spacingVerticalM }}>
-            <Text size={600} weight="semibold">
-              Explore Packages
-            </Text>
-            {!loading && (
-              <Text size={300} style={{ marginLeft: tokens.spacingHorizontalS, color: tokens.colorNeutralForeground3 }}>
-                {packages.length} {packages.length === 1 ? 'package' : 'packages'}
-              </Text>
-            )}
-          </div>
-
           {loading ? (
             <div style={{ display: 'flex', justifyContent: 'center', padding: tokens.spacingVerticalXXL }}>
               <Spinner label="Loading packages..." />
             </div>
           ) : packages.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: tokens.spacingVerticalXXL }}>
-              <Text size={400} style={{ color: tokens.colorNeutralForeground3 }}>
-                No packages found. {search && 'Try a different search term.'}
-              </Text>
+            <div style={{
+              textAlign: 'center',
+              padding: tokens.spacingVerticalXXL,
+              color: tokens.colorNeutralForeground3,
+            }}>
+              No packages found. {search && 'Try a different search term.'}
             </div>
           ) : (
             <div style={{
-              display: 'flex',
-              flexWrap: 'wrap',
-              gap: tokens.spacingHorizontalM,
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
+              gap: tokens.spacingHorizontalL,
             }}>
               {packages.map(pkg => (
                 <PackageCard
@@ -72,8 +76,21 @@ export function Home() {
               ))}
             </div>
           )}
-        </main>
-      </div>
+        </div>
+      </main>
+
+      {/* Footer */}
+      <footer style={{
+        textAlign: 'center',
+        padding: tokens.spacingVerticalM,
+        borderTop: `1px solid ${tokens.colorNeutralStroke2}`,
+        background: tokens.colorNeutralBackground1,
+        fontSize: tokens.fontSizeBase200,
+        color: tokens.colorNeutralForeground4,
+        flexShrink: 0,
+      }}>
+        Built with Fluent UI &middot; Powered by Supabase &middot; Design Canvas Plugins
+      </footer>
     </div>
   );
 }

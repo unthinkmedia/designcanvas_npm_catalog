@@ -17,7 +17,6 @@ export function Dashboard() {
   const [tab, setTab] = useState<DashTab>('favorites');
   const [favoritePackages, setFavoritePackages] = useState<Package[]>([]);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState('');
 
   useEffect(() => {
     if (!user || favoriteIds.size === 0) { setLoading(false); return; }
@@ -38,8 +37,8 @@ export function Dashboard() {
 
   if (!user) {
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
-        <Header search={search} onSearchChange={setSearch} />
+      <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', background: tokens.colorNeutralBackground2 }}>
+        <Header />
         <div style={{ textAlign: 'center', padding: tokens.spacingVerticalXXL }}>
           <Text size={500}>Sign in to view your dashboard</Text>
           <br />
@@ -52,50 +51,57 @@ export function Dashboard() {
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
-      <Header search={search} onSearchChange={setSearch} />
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', background: tokens.colorNeutralBackground2 }}>
+      <Header />
 
-      <main style={{ flex: 1, overflow: 'auto', padding: tokens.spacingVerticalL }}>
-        <Text size={600} weight="semibold" block style={{ marginBottom: tokens.spacingVerticalM }}>
-          My Dashboard
-        </Text>
-
-        <TabList
-          selectedValue={tab}
-          onTabSelect={(_e, data) => setTab(data.value as DashTab)}
-          style={{ marginBottom: tokens.spacingVerticalM }}
-        >
-          <Tab value="favorites">Favorites ({favoriteIds.size})</Tab>
-          <Tab value="collections">Collections</Tab>
-        </TabList>
-
-        {tab === 'favorites' && (
-          loading ? (
-            <Spinner label="Loading favorites..." />
-          ) : favoritePackages.length === 0 ? (
-            <Text style={{ color: tokens.colorNeutralForeground3 }}>
-              No favorites yet. Browse the catalog and heart some packages!
-            </Text>
-          ) : (
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: tokens.spacingHorizontalM }}>
-              {favoritePackages.map(pkg => (
-                <PackageCard
-                  key={pkg.id}
-                  pkg={pkg}
-                  isFavorite={isFavorite(pkg.id)}
-                  onToggleFavorite={() => toggle(pkg.id)}
-                  isAuthenticated
-                />
-              ))}
-            </div>
-          )
-        )}
-
-        {tab === 'collections' && (
-          <Text style={{ color: tokens.colorNeutralForeground3 }}>
-            Collections coming soon. Create curated lists of packages to share with your team.
+      <main style={{ flex: 1, overflow: 'auto', padding: `${tokens.spacingVerticalL} ${tokens.spacingHorizontalXL}` }}>
+        <div style={{ maxWidth: 1280, margin: '0 auto' }}>
+          <Text size={600} weight="semibold" block style={{ marginBottom: tokens.spacingVerticalM }}>
+            My Dashboard
           </Text>
-        )}
+
+          <TabList
+            selectedValue={tab}
+            onTabSelect={(_e, data) => setTab(data.value as DashTab)}
+            size="small"
+            style={{ marginBottom: tokens.spacingVerticalL }}
+          >
+            <Tab value="favorites">Favorites ({favoriteIds.size})</Tab>
+            <Tab value="collections">Collections</Tab>
+          </TabList>
+
+          {tab === 'favorites' && (
+            loading ? (
+              <Spinner label="Loading favorites..." />
+            ) : favoritePackages.length === 0 ? (
+              <Text style={{ color: tokens.colorNeutralForeground3 }}>
+                No favorites yet. Browse the catalog and heart some packages!
+              </Text>
+            ) : (
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
+                gap: tokens.spacingHorizontalL,
+              }}>
+                {favoritePackages.map(pkg => (
+                  <PackageCard
+                    key={pkg.id}
+                    pkg={pkg}
+                    isFavorite={isFavorite(pkg.id)}
+                    onToggleFavorite={() => toggle(pkg.id)}
+                    isAuthenticated
+                  />
+                ))}
+              </div>
+            )
+          )}
+
+          {tab === 'collections' && (
+            <Text style={{ color: tokens.colorNeutralForeground3 }}>
+              Collections coming soon. Create curated lists of packages to share with your team.
+            </Text>
+          )}
+        </div>
       </main>
     </div>
   );

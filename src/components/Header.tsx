@@ -18,6 +18,7 @@ import {
 } from '@fluentui/react-icons';
 import { useAuth } from '@/hooks/useAuth';
 import { Link, useNavigate } from 'react-router-dom';
+import { AddPackageDialog } from '@/components/AddPackageDialog';
 
 export function Header() {
   const { user, signIn, signOut } = useAuth();
@@ -47,6 +48,7 @@ export function Header() {
       </Link>
 
       <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: tokens.spacingHorizontalS }}>
+        {user && <AddPackageDialog />}
         {user ? (
           <Menu>
             <MenuTrigger disableButtonEnhancement>

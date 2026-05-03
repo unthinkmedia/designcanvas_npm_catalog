@@ -56,8 +56,12 @@ export function Home() {
               textAlign: 'center',
               padding: tokens.spacingVerticalXXL,
               color: tokens.colorNeutralForeground3,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: tokens.spacingVerticalM,
             }}>
-              No packages found. {search && 'Try a different search term.'}
+              <div>No packages found. {search && 'Try a different search term.'}</div>
             </div>
           ) : (
             <div style={{

@@ -1,13 +1,6 @@
 {
-	"servers": {
-		"Design Canvas Plugins": {
-			"url": "https://brave-field-0ab65a210.6.azurestaticapps.net/api/mcp",
-			"type": "http"
-		},
-		"foundry-storybook": {
-			"url": "https://brave-field-0ab65a210.6.azurestaticapps.net/api/mcp",
-			"type": "http"
-		}
-	},
-	"inputs": []
+  "servers": {
+  
+  },
+  "inputs": []
 }

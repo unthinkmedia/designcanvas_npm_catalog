@@ -4,7 +4,7 @@ import { resolve } from 'path';
 
 export default defineConfig({
   plugins: [react()],
-  base: '/npm-catalog/',
+  base: '/designcanvas_npm_catalog/',
   resolve: {
     alias: {
       '@': resolve(__dirname, 'src'),

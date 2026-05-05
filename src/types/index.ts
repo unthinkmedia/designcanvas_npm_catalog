@@ -18,8 +18,8 @@ export interface Package {
   id: string;
   name: string;
   scope: string | null;
+  display_name: string | null;
   description: string | null;
-  category_id: string | null;
   author_id: string | null;
   tags: string[];
   npm_url: string | null;
@@ -29,6 +29,7 @@ export interface Package {
   // Social proof metrics
   weekly_downloads: number;
   github_stars: number;
+  favorite_count: number;
   bundle_size_gzip: number | null;
   license: string | null;
   has_types: boolean;
@@ -38,8 +39,9 @@ export interface Package {
   metrics_updated_at: string | null;
   created_at: string;
   updated_at: string;
+  added_by: string | null;
   // Joined relations (optional)
-  category?: Category;
+  categories?: Category[];
   author?: Author;
 }
 
@@ -64,4 +66,4 @@ export interface CollectionPackage {
   added_at: string;
 }
 
-export type SortOption = 'downloads' | 'stars' | 'recent' | 'name';
+export type SortOption = 'downloads' | 'loved' | 'recent' | 'name';

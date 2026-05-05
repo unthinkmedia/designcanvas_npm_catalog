@@ -1,7 +1,7 @@
 import { Badge, Text, Tooltip, tokens } from '@fluentui/react-components';
 import {
   ArrowDownload24Regular,
-  Star24Regular,
+  Heart24Regular,
   Bug24Regular,
   Archive24Regular,
   CheckmarkCircle16Regular,
@@ -33,10 +33,10 @@ export function MetricsBadges({ pkg, compact }: MetricsBadgesProps) {
         </span>
       </Tooltip>
 
-      <Tooltip content="GitHub stars" relationship="label">
+      <Tooltip content="Favorites" relationship="label">
         <span style={{ display: 'inline-flex', alignItems: 'center', gap: 2 }}>
-          <Star24Regular style={{ width: 14, height: 14 }} />
-          {formatDownloads(pkg.github_stars)}
+          <Heart24Regular style={{ width: 14, height: 14, color: tokens.colorPaletteRedForeground1 }} />
+          {formatDownloads(pkg.favorite_count ?? 0)}
         </span>
       </Tooltip>
 

@@ -14,6 +14,7 @@ export function Home() {
   const [categories, setCategories] = useState<string[]>([]);
   const [sort, setSort] = useState<SortOption>('downloads');
 
+  const { packages: allPackages } = usePackages();
   const { packages, loading } = usePackages({ search, categories: categories.length ? categories : undefined, sort });
   const { user } = useAuth();
   const { isFavorite, toggle } = useFavorites();
@@ -23,7 +24,7 @@ export function Home() {
       display: 'flex',
       flexDirection: 'column',
       height: '100vh',
-      background: tokens.colorNeutralBackground2,
+      background: tokens.colorNeutralBackground3,
     }}>
       <Header />
       <HeroBanner />
@@ -35,6 +36,7 @@ export function Home() {
         sort={sort}
         onSortChange={setSort}
         packageCount={packages.length}
+        allPackages={allPackages}
       />
 
       <main style={{
@@ -93,7 +95,7 @@ export function Home() {
         color: tokens.colorNeutralForeground4,
         flexShrink: 0,
       }}>
-        Built with Fluent UI &middot; Powered by Supabase &middot; Design Canvas Plugins
+        Community-contributed plugins. Review packages before installing &mdash; use at your own discretion.
       </footer>
     </div>
   );

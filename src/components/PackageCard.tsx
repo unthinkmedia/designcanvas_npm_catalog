@@ -11,7 +11,7 @@ import {
   Heart24Regular,
   Heart24Filled,
   ArrowDownload16Regular,
-  Star16Regular,
+  Heart16Regular,
   Archive16Regular,
   CheckmarkCircle16Regular,
 } from '@fluentui/react-icons';
@@ -24,11 +24,13 @@ interface PackageCardProps {
   isFavorite: boolean;
   onToggleFavorite: () => void;
   isAuthenticated: boolean;
+  hideFavorite?: boolean;
 }
 
-export function PackageCard({ pkg, isFavorite, onToggleFavorite, isAuthenticated }: PackageCardProps) {
+export function PackageCard({ pkg, isFavorite, onToggleFavorite, isAuthenticated, hideFavorite }: PackageCardProps) {
   const navigate = useNavigate();
-  const displayName = pkg.scope ? `@${pkg.scope}/${pkg.name}` : pkg.name;
+  const fullName = pkg.scope ? `@${pkg.scope}/${pkg.name}` : pkg.name;
+  const displayName = pkg.display_name ?? fullName;
 
   return (
     <Card
@@ -37,21 +39,23 @@ export function PackageCard({ pkg, isFavorite, onToggleFavorite, isAuthenticated
         minWidth: 280,
         flex: '1 1 320px',
         maxWidth: 420,
-        background: tokens.colorNeutralBackground3,
-        border: `1px solid ${tokens.colorNeutralStroke2}`,
-        borderRadius: tokens.borderRadiusLarge,
+        background: tokens.colorNeutralBackground1,
+        border: 'none',
+        borderRadius: tokens.borderRadiusXLarge,
         padding: 0,
         overflow: 'hidden',
-        transition: 'border-color 0.15s, box-shadow 0.15s',
+        boxShadow: `0 1px 4px ${tokens.colorNeutralShadowAmbient}`,
+        transition: 'box-shadow 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94), transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+        willChange: 'transform, box-shadow',
       }}
       onClick={() => navigate(`/package/${encodeURIComponent(pkg.name)}`)}
       onMouseEnter={e => {
-        (e.currentTarget as HTMLElement).style.borderColor = tokens.colorBrandStroke1;
-        (e.currentTarget as HTMLElement).style.boxShadow = `0 0 0 1px ${tokens.colorBrandStroke2}`;
+        (e.currentTarget as HTMLElement).style.boxShadow = `0 12px 28px ${tokens.colorNeutralShadowAmbient}, 0 4px 10px ${tokens.colorNeutralShadowKey}`;
+        (e.currentTarget as HTMLElement).style.transform = 'translateY(-3px) scale(1.01)';
       }}
       onMouseLeave={e => {
-        (e.currentTarget as HTMLElement).style.borderColor = tokens.colorNeutralStroke2;
-        (e.currentTarget as HTMLElement).style.boxShadow = 'none';
+        (e.currentTarget as HTMLElement).style.boxShadow = `0 1px 4px ${tokens.colorNeutralShadowAmbient}`;
+        (e.currentTarget as HTMLElement).style.transform = 'translateY(0) scale(1)';
       }}
     >
       <div style={{ padding: `${tokens.spacingVerticalM} ${tokens.spacingHorizontalM}` }}>
@@ -63,7 +67,14 @@ export function PackageCard({ pkg, isFavorite, onToggleFavorite, isAuthenticated
           marginBottom: tokens.spacingVerticalXS,
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: tokens.spacingHorizontalS, minWidth: 0, overflow: 'hidden' }}>
-            <Text weight="semibold" size={400} truncate style={{ color: tokens.colorNeutralForeground1 }}>
+            <Text weight="semibold" size={400} truncate style={{
+              color: tokens.colorNeutralForeground1,
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+              minWidth: 0,
+              display: 'block',
+            }}>
               {displayName}
             </Text>
             {pkg.latest_version && (
@@ -72,7 +83,7 @@ export function PackageCard({ pkg, isFavorite, onToggleFavorite, isAuthenticated
               </Badge>
             )}
           </div>
-          {isAuthenticated && (
+          {isAuthenticated && !hideFavorite && (
             <Button
               appearance="subtle"
               size="small"
@@ -109,8 +120,11 @@ export function PackageCard({ pkg, isFavorite, onToggleFavorite, isAuthenticated
           WebkitLineClamp: 2,
           WebkitBoxOrient: 'vertical',
           overflow: 'hidden',
+          textOverflow: 'ellipsis',
           lineHeight: '20px',
           minHeight: 40,
+          maxHeight: 40,
+          wordBreak: 'break-word',
         }}>
           {pkg.description ?? 'No description'}
         </Text>
@@ -160,10 +174,10 @@ export function PackageCard({ pkg, isFavorite, onToggleFavorite, isAuthenticated
               {formatDownloads(pkg.weekly_downloads)}
             </span>
           </Tooltip>
-          <Tooltip content="GitHub stars" relationship="label">
+          <Tooltip content="Favorites" relationship="label">
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3 }}>
-              <Star16Regular style={{ fontSize: 12 }} />
-              {formatDownloads(pkg.github_stars)}
+              <Heart16Regular style={{ fontSize: 12, color: tokens.colorPaletteRedForeground1 }} />
+              {formatDownloads(pkg.favorite_count ?? 0)}
             </span>
           </Tooltip>
           {pkg.bundle_size_gzip != null && (
@@ -185,10 +199,14 @@ export function PackageCard({ pkg, isFavorite, onToggleFavorite, isAuthenticated
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: tokens.spacingHorizontalS, flexShrink: 0, whiteSpace: 'nowrap' }}>
-          {pkg.category && (
-            <Text size={100} style={{ color: tokens.colorNeutralForeground4 }}>
-              {pkg.category.name}
-            </Text>
+          {pkg.categories && pkg.categories.length > 0 && (
+            <span style={{ display: 'inline-flex', gap: 4, flexShrink: 0 }}>
+              {pkg.categories.map(cat => (
+                <Text key={cat.slug} size={100} style={{ color: tokens.colorNeutralForeground4 }}>
+                  {cat.name}
+                </Text>
+              ))}
+            </span>
           )}
           {pkg.last_published_at && (
             <Text size={100} style={{ color: tokens.colorNeutralForeground4 }}>

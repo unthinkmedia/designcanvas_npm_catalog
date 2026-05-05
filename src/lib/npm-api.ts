@@ -5,12 +5,13 @@ const BUNDLEPHOBIA = 'https://bundlephobia.com/api';
 export interface NpmPackageInfo {
   name: string;
   description: string;
+  readme?: string;
   'dist-tags': { latest: string };
   license?: string;
   time: Record<string, string>;
   maintainers: { name: string; email?: string }[];
   repository?: { type: string; url: string };
-  versions: Record<string, { types?: string; typings?: string }>;
+  versions: Record<string, { types?: string; typings?: string; dependencies?: Record<string, string>; devDependencies?: Record<string, string> }>;
 }
 
 export interface NpmDownloads {
@@ -27,13 +28,15 @@ export interface BundlephobiaResult {
 }
 
 export async function fetchNpmPackage(name: string): Promise<NpmPackageInfo> {
-  const res = await fetch(`${NPM_REGISTRY}/${encodeURIComponent(name)}`);
+  const encodedName = name.startsWith('@') ? `@${encodeURIComponent(name.slice(1))}` : encodeURIComponent(name);
+  const res = await fetch(`${NPM_REGISTRY}/${encodedName}`);
   if (!res.ok) throw new Error(`npm registry: ${res.status}`);
   return res.json();
 }
 
 export async function fetchWeeklyDownloads(name: string): Promise<number> {
-  const res = await fetch(`${NPM_API}/downloads/point/last-week/${encodeURIComponent(name)}`);
+  const encodedName = name.startsWith('@') ? `@${encodeURIComponent(name.slice(1))}` : encodeURIComponent(name);
+  const res = await fetch(`${NPM_API}/downloads/point/last-week/${encodedName}`);
   if (!res.ok) return 0;
   const data: NpmDownloads = await res.json();
   return data.downloads;

@@ -15,13 +15,16 @@ import {
   Heart24Regular,
   Settings24Regular,
   Box24Regular,
+  PuzzlePieceRegular,
+  Open16Regular,
+  Document24Regular,
 } from '@fluentui/react-icons';
 import { useAuth } from '@/hooks/useAuth';
 import { Link, useNavigate } from 'react-router-dom';
 import { AddPackageDialog } from '@/components/AddPackageDialog';
 
 export function Header() {
-  const { user, signIn, signOut } = useAuth();
+  const { user, signIn, signOut, authError } = useAuth();
   const navigate = useNavigate();
 
   return (
@@ -30,8 +33,6 @@ export function Header() {
       alignItems: 'center',
       gap: tokens.spacingHorizontalM,
       padding: `${tokens.spacingVerticalS} ${tokens.spacingHorizontalXL}`,
-      borderBottom: `1px solid ${tokens.colorNeutralStroke2}`,
-      background: tokens.colorNeutralBackground1,
       height: 48,
       flexShrink: 0,
     }}>
@@ -48,6 +49,27 @@ export function Header() {
       </Link>
 
       <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: tokens.spacingHorizontalS }}>
+        <Button
+          appearance="subtle"
+          size="small"
+          icon={<Document24Regular />}
+          as={Link}
+          to="/docs"
+        >
+          Docs
+        </Button>
+        <Button
+          appearance="subtle"
+          size="small"
+          icon={<PuzzlePieceRegular />}
+          as="a"
+          href="https://github.com/unthinkmedia/dc-example-hello"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Create a Plugin
+          <Open16Regular style={{ marginLeft: tokens.spacingHorizontalXS }} />
+        </Button>
         {user && <AddPackageDialog />}
         {user ? (
           <Menu>
@@ -78,13 +100,20 @@ export function Header() {
             </MenuPopover>
           </Menu>
         ) : (
-          <Button
-            appearance="subtle"
-            icon={<PersonCircle24Regular />}
-            onClick={signIn}
-          >
-            Sign in with GitHub
-          </Button>
+          <>
+            {authError && (
+              <Text size={200} style={{ color: tokens.colorPaletteRedForeground1 }}>
+                {authError}
+              </Text>
+            )}
+            <Button
+              appearance="subtle"
+              icon={<PersonCircle24Regular />}
+              onClick={signIn}
+            >
+              Sign in with GitHub
+            </Button>
+          </>
         )}
       </div>
     </header>

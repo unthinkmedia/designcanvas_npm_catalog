@@ -47,6 +47,10 @@ export const foundryDarkTheme: Theme = {
   colorNeutralBackground5: 'hsl(0, 0%, 3%)',    // Grey 3  — deepest
   colorNeutralBackground6: 'hsl(0, 0%, 0%)',    // True black
 
+  // ── Subtle / Outline Button Hover Overrides ──
+  colorNeutralBackground1Hover: 'hsl(0, 0%, 18%)',   // more visible hover on dark bg
+  colorNeutralBackground1Pressed: 'hsl(0, 0%, 22%)', // more visible pressed on dark bg
+
   // ── Brand Foreground Overrides (contrast-safe) ──
   colorBrandForeground1: '#A175F3',              // variant 110
   colorBrandForeground2: '#AF86F5',              // variant 120

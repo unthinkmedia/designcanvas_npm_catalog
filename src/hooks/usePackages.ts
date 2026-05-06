@@ -1,5 +1,6 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
+import { fetchLatestVersion } from '@/lib/npm-api';
 import type { Package, Category, SortOption } from '@/types';
 
 interface UsePackagesOptions {
@@ -63,6 +64,50 @@ export function usePackages({ categories, search, sort = 'downloads', tag }: Use
     window.addEventListener('package-added', handler);
     return () => window.removeEventListener('package-added', handler);
   }, [fetchPackages]);
+
+  // Background refresh: update stale packages from npm (metrics older than 1 hour)
+  const refreshedRef = useRef(false);
+  useEffect(() => {
+    if (refreshedRef.current || packages.length === 0) return;
+    refreshedRef.current = true;
+
+    const ONE_HOUR = 60 * 60 * 1000;
+    const stale = packages.filter(pkg => {
+      if (!pkg.metrics_updated_at) return true;
+      return Date.now() - new Date(pkg.metrics_updated_at).getTime() > ONE_HOUR;
+    });
+    if (stale.length === 0) return;
+
+    // Refresh up to 10 at a time to avoid hammering npm
+    const batch = stale.slice(0, 10);
+    Promise.allSettled(
+      batch.map(async (pkg) => {
+        const fullName = pkg.scope ? `@${pkg.scope}/${pkg.name}` : pkg.name;
+        const info = await fetchLatestVersion(fullName);
+        if (!info) return;
+        if (info.version !== pkg.latest_version || info.downloads !== pkg.weekly_downloads) {
+          await supabase
+            .from('packages')
+            .update({
+              latest_version: info.version,
+              last_published_at: info.date,
+              weekly_downloads: info.downloads,
+              metrics_updated_at: new Date().toISOString(),
+            })
+            .eq('id', pkg.id);
+        } else {
+          // Mark as checked even if nothing changed
+          await supabase
+            .from('packages')
+            .update({ metrics_updated_at: new Date().toISOString() })
+            .eq('id', pkg.id);
+        }
+      })
+    ).then(() => {
+      // Re-fetch to show updated data
+      fetchPackages();
+    });
+  }, [packages, fetchPackages]);
 
   return { packages, loading, error, refetch: fetchPackages };
 }

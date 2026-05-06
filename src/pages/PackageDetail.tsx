@@ -110,7 +110,7 @@ export function PackageDetail() {
     const fullName = pkg.scope ? `@${pkg.scope}/${pkg.name}` : pkg.name;
     setNpmLoading(true);
     fetchNpmPackage(fullName)
-      .then(info => {
+      .then(async (info) => {
         setReadme(info.readme ?? null);
 
         // Build version list from time field (excludes 'created' and 'modified')
@@ -125,6 +125,19 @@ export function PackageDetail() {
         if (latest && info.versions?.[latest]) {
           setDeps(info.versions[latest].dependencies ?? {});
           setDevDeps(info.versions[latest].devDependencies ?? {});
+        }
+
+        // Sync latest version + publish date back to DB if changed
+        if (latest && latest !== pkg.latest_version) {
+          const lastPublished = info.time?.[latest] ?? null;
+          await supabase
+            .from('packages')
+            .update({
+              latest_version: latest,
+              last_published_at: lastPublished,
+              metrics_updated_at: new Date().toISOString(),
+            })
+            .eq('id', pkg.id);
         }
       })
       .catch(() => {

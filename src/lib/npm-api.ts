@@ -85,3 +85,24 @@ export function timeAgo(dateStr: string): string {
   if (days < 365) return `${Math.floor(days / 30)}mo ago`;
   return `${Math.floor(days / 365)}y ago`;
 }
+
+/**
+ * Fetch the latest version + publish date for a package from npm.
+ * Uses the abbreviated registry endpoint for speed.
+ */
+export async function fetchLatestVersion(name: string): Promise<{ version: string; date: string; downloads: number } | null> {
+  try {
+    const encodedName = name.startsWith('@') ? `@${encodeURIComponent(name.slice(1))}` : encodeURIComponent(name);
+    // Fetch packument for dist-tags + time
+    const res = await fetch(`${NPM_REGISTRY}/${encodedName}`);
+    if (!res.ok) return null;
+    const data = await res.json();
+    const version = data['dist-tags']?.latest;
+    if (!version) return null;
+    const date = data.time?.[version] ?? new Date().toISOString();
+    const downloads = await fetchWeeklyDownloads(name);
+    return { version, date, downloads };
+  } catch {
+    return null;
+  }
+}

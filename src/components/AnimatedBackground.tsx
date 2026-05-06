@@ -93,7 +93,7 @@ export function MeshBackground() {
           background: `radial-gradient(circle, ${b.color} 0%, transparent 70%)`,
           animation: b.animation,
           willChange: 'transform',
-          translate: `${offset.x * depths[i]}px ${offset.y * depths[i]}px`,
+          translate: `${offset.x * (depths[i] ?? 0)}px ${offset.y * (depths[i] ?? 0)}px`,
           transition: 'translate 0.6s cubic-bezier(0.22, 1, 0.36, 1)',
         }} />
       ))}
@@ -170,8 +170,8 @@ export function WireframeMesh() {
           mouseInfluence = nt * nt * (3 - 2 * nt) * LIFT_STRENGTH;
         }
 
-        target.current[idx] = Math.max(wave, target.current[idx] * TRAIL_DECAY, mouseInfluence);
-        trail.current[idx] += (target.current[idx] - trail.current[idx]) * LERP_SPEED;
+        target.current[idx] = Math.max(wave, (target.current[idx] ?? 0) * TRAIL_DECAY, mouseInfluence);
+        trail.current[idx] = (trail.current[idx] ?? 0) + ((target.current[idx] ?? 0) - (trail.current[idx] ?? 0)) * LERP_SPEED;
       }
     }
 
@@ -203,14 +203,14 @@ export function WireframeMesh() {
     for (let row = 0; row < GRID_ROWS; row++) {
       for (let col = 0; col < GRID_COLS; col++) {
         const idx = row * GRID_COLS + col;
-        projected[idx] = project(col * cellW, row * cellH + gridOffsetY, trail.current[idx]);
+        projected[idx] = project(col * cellW, row * cellH + gridOffsetY, trail.current[idx] ?? 0);
       }
     }
 
     for (let row = GRID_ROWS - 1; row >= 0; row--) {
       for (let col = 0; col < GRID_COLS; col++) {
         const idx = row * GRID_COLS + col;
-        const z = trail.current[idx];
+        const z = trail.current[idx] ?? 0;
         const p = projected[idx];
         const lift = Math.min(Math.abs(z) / LIFT_STRENGTH, 1);
 
@@ -219,7 +219,7 @@ export function WireframeMesh() {
 
         if (col < GRID_COLS - 1) {
           const np = projected[idx + 1];
-          const nz = trail.current[idx + 1];
+          const nz = trail.current[idx + 1] ?? 0;
           const nLift = Math.min(Math.abs(nz) / LIFT_STRENGTH, 1);
           const avgLift = (lift + nLift) * 0.5;
           const la = 0.03 + depthAlpha * 0.08 + avgLift * 0.4;
@@ -244,7 +244,7 @@ export function WireframeMesh() {
         if (row < GRID_ROWS - 1) {
           const nIdx = (row + 1) * GRID_COLS + col;
           const np = projected[nIdx];
-          const nz = trail.current[nIdx];
+          const nz = trail.current[nIdx] ?? 0;
           const nLift = Math.min(Math.abs(nz) / LIFT_STRENGTH, 1);
           const avgLift = (lift + nLift) * 0.5;
           const la = 0.03 + depthAlpha * 0.08 + avgLift * 0.35;

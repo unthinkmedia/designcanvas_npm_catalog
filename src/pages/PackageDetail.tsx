@@ -84,7 +84,7 @@ function CodeBlock({ children, ...props }: React.HTMLAttributes<HTMLPreElement>)
 function extractText(node: React.ReactNode): string {
   if (typeof node === 'string') return node;
   if (Array.isArray(node)) return node.map(extractText).join('');
-  if (node && typeof node === 'object' && 'props' in node) return extractText((node as React.ReactElement).props.children);
+  if (node && typeof node === 'object' && 'props' in node) return extractText((node as any).props.children);
   return '';
 }
 

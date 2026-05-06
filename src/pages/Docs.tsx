@@ -25,8 +25,8 @@ function extractToc(markdown: string): TocEntry[] {
   for (const line of lines) {
     const match = line.match(/^(#{1,3})\s+(.+)/);
     if (match) {
-      const level = match[1].length;
-      const text = match[2].trim();
+      const level = match[1]!.length;
+      const text = match[2]!.trim();
       entries.push({ id: slugify(text), text, level });
     }
   }
@@ -84,7 +84,7 @@ export function Docs() {
     function Heading({ children }: { children?: React.ReactNode }) {
       const text = extractTextFromChildren(children);
       const id = slugify(text);
-      const Tag = `h${level}` as keyof JSX.IntrinsicElements;
+      const Tag = `h${level}` as any;
       return <Tag id={id} style={{ scrollMarginTop: 16 }}>{children}</Tag>;
     };
 
@@ -259,7 +259,7 @@ function extractTextFromChildren(children: React.ReactNode): string {
   if (typeof children === 'number') return String(children);
   if (Array.isArray(children)) return children.map(extractTextFromChildren).join('');
   if (children && typeof children === 'object' && 'props' in children) {
-    return extractTextFromChildren((children as React.ReactElement).props.children);
+    return extractTextFromChildren((children as any).props.children);
   }
   return '';
 }

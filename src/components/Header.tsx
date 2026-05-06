@@ -53,8 +53,8 @@ export function Header() {
           appearance="subtle"
           size="small"
           icon={<Document24Regular />}
-          as={Link}
-          to="/docs"
+          as={Link as any}
+          {...{ to: "/docs" } as any}
         >
           Docs
         </Button>

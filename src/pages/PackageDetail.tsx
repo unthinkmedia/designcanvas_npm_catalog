@@ -129,15 +129,14 @@ export function PackageDetail() {
 
         // Sync latest version + publish date back to DB if changed
         if (latest && latest !== pkg.latest_version) {
-          const lastPublished = info.time?.[latest] ?? null;
-          await supabase
-            .from('packages')
-            .update({
-              latest_version: latest,
-              last_published_at: lastPublished,
-              metrics_updated_at: new Date().toISOString(),
-            })
-            .eq('id', pkg.id);
+          const lastPublished = info.time?.[latest] ?? new Date().toISOString();
+          await supabase.rpc('update_package_metrics', {
+            p_id: pkg.id,
+            p_latest_version: latest,
+            p_last_published_at: lastPublished,
+            p_weekly_downloads: pkg.weekly_downloads,
+            p_metrics_updated_at: new Date().toISOString(),
+          });
         }
       })
       .catch(() => {
